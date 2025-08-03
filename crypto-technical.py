@@ -393,7 +393,9 @@ with tab2:
             xaxis_title="Date",
             yaxis_title="Price (USD)",
             hovermode='x unified',
-            height=600
+            height=600,
+            plot_bgcolor='#d2cbbc',
+            paper_bgcolor='#d2cbbc'
         )
         
         st.plotly_chart(fig, use_container_width=True)
