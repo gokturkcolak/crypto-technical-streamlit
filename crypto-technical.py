@@ -12,7 +12,6 @@ from plotly.subplots import make_subplots
 import requests
 import json
 from datetime import datetime, timedelta
-import talib
 from io import StringIO
 
 # Page configuration
@@ -52,7 +51,47 @@ if 'token_data' not in st.session_state:
 if 'basic_info' not in st.session_state:
     st.session_state.basic_info = None
 
-# Helper functions
+# Technical Analysis Helper Functions
+def sma(data, period):
+    """Simple Moving Average"""
+    return data.rolling(window=period).mean()
+
+def ema(data, period):
+    """Exponential Moving Average"""
+    return data.ewm(span=period).mean()
+
+def rsi(data, period=14):
+    """Relative Strength Index"""
+    delta = data.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
+def macd(data, fast=12, slow=26, signal=9):
+    """MACD Indicator"""
+    ema_fast = ema(data, fast)
+    ema_slow = ema(data, slow)
+    macd_line = ema_fast - ema_slow
+    signal_line = ema(macd_line, signal)
+    return macd_line, signal_line
+
+def bollinger_bands(data, period=20, std_dev=2):
+    """Bollinger Bands"""
+    sma_data = sma(data, period)
+    std_data = data.rolling(window=period).std()
+    upper = sma_data + (std_data * std_dev)
+    lower = sma_data - (std_data * std_dev)
+    return upper, sma_data, lower
+
+def stochastic_oscillator(high, low, close, k_period=14, d_period=3):
+    """Stochastic Oscillator"""
+    lowest_low = low.rolling(window=k_period).min()
+    highest_high = high.rolling(window=k_period).max()
+    k_percent = 100 * ((close - lowest_low) / (highest_high - lowest_low))
+    d_percent = k_percent.rolling(window=d_period).mean()
+    return k_percent, d_percent
+
 def calculate_technical_indicators(df):
     """Calculate all technical indicators"""
     df = df.copy()
@@ -64,10 +103,10 @@ def calculate_technical_indicators(df):
     df['vol_change'] = df['volume'].pct_change()
     
     # Moving averages
-    df['SMA_10'] = talib.SMA(df['price'].values, timeperiod=10)
-    df['SMA_50'] = talib.SMA(df['price'].values, timeperiod=50)
-    df['EMA_12'] = talib.EMA(df['price'].values, timeperiod=12)
-    df['EMA_26'] = talib.EMA(df['price'].values, timeperiod=26)
+    df['SMA_10'] = sma(df['price'], 10)
+    df['SMA_50'] = sma(df['price'], 50)
+    df['EMA_12'] = ema(df['price'], 12)
+    df['EMA_26'] = ema(df['price'], 26)
     
     # Momentum indicators
     df['momentum_5'] = df['price'] - df['price'].shift(5)
@@ -78,15 +117,32 @@ def calculate_technical_indicators(df):
     df['volatility_30'] = df['log_return'].rolling(window=30).std()
     
     # Volume indicators
-    df['vol_sma_10'] = talib.SMA(df['volume'].values, timeperiod=10)
+    df['vol_sma_10'] = sma(df['volume'], 10)
     df['volume_spike'] = df['volume'] / df['vol_sma_10']
     
     # RSI
-    df['rsi'] = talib.RSI(df['price'].values, timeperiod=14)
+    df['rsi'] = rsi(df['price'], 14)
     
     # MACD
-    df['macd_line'] = df['EMA_12'] - df['EMA_26']
-    df['signal_line'] = talib.EMA(df['macd_line'].values, timeperiod=9)
+    macd_line, signal_line = macd(df['price'])
+    df['macd_line'] = macd_line
+    df['signal_line'] = signal_line
+    df['macd_histogram'] = macd_line - signal_line
+    
+    # Bollinger Bands
+    bb_upper, bb_middle, bb_lower = bollinger_bands(df['price'])
+    df['bb_upper'] = bb_upper
+    df['bb_middle'] = bb_middle
+    df['bb_lower'] = bb_lower
+    
+    # Create high/low/close for additional indicators (using price as proxy)
+    df['high'] = df['price'] * 1.02  # Approximate high
+    df['low'] = df['price'] * 0.98   # Approximate low
+    
+    # Stochastic Oscillator
+    stoch_k, stoch_d = stochastic_oscillator(df['high'], df['low'], df['price'])
+    df['stoch_k'] = stoch_k
+    df['stoch_d'] = stoch_d
     
     return df
 
@@ -186,8 +242,9 @@ if st.sidebar.button("🔍 Search Tokens", use_container_width=True):
 
 # Token selection
 token_options = {
-    "Ethereum": "ethereum",
-    "Solana": "solana" 
+    "Bitcoin": "bitcoin",
+    "Ethereum": "ethereum", 
+    "Strawberry AI": "strawberry-ai"
 }
 
 if 'matching_tokens' in st.session_state:
@@ -294,8 +351,24 @@ with tab2:
     if st.session_state.token_data is not None:
         data = st.session_state.token_data
         
-        # Price chart with moving averages
+        # Price chart with moving averages and Bollinger Bands
         fig = go.Figure()
+        
+        # Bollinger Bands
+        if 'bb_upper' in data.columns:
+            fig.add_trace(go.Scatter(
+                x=data['date'], y=data['bb_upper'],
+                mode='lines', name='BB Upper',
+                line=dict(color='lightgray', width=1),
+                fill=None
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=data['date'], y=data['bb_lower'],
+                mode='lines', name='BB Lower',
+                line=dict(color='lightgray', width=1),
+                fill='tonexty', fillcolor='rgba(211,211,211,0.3)'
+            ))
         
         fig.add_trace(go.Scatter(
             x=data['date'], y=data['price'],
@@ -316,7 +389,7 @@ with tab2:
         ))
         
         fig.update_layout(
-            title=f"Price Analysis - {st.session_state.basic_info['name']}",
+            title=f"Price Analysis with Bollinger Bands - {st.session_state.basic_info['name']}",
             xaxis_title="Date",
             yaxis_title="Price (USD)",
             hovermode='x unified',
@@ -377,7 +450,81 @@ with tab3:
         col1, col2 = st.columns(2)
         
         with col1:
-            # Momentum indicators
+            # MACD
+            fig_macd = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                                   vertical_spacing=0.1,
+                                   subplot_titles=('MACD Line & Signal', 'MACD Histogram'))
+            
+            if 'macd_line' in data.columns:
+                fig_macd.add_trace(go.Scatter(
+                    x=data['date'], y=data['macd_line'],
+                    mode='lines', name='MACD Line',
+                    line=dict(color='blue')
+                ), row=1, col=1)
+                
+                fig_macd.add_trace(go.Scatter(
+                    x=data['date'], y=data['signal_line'],
+                    mode='lines', name='Signal Line',
+                    line=dict(color='red')
+                ), row=1, col=1)
+                
+                fig_macd.add_trace(go.Bar(
+                    x=data['date'], y=data['macd_histogram'],
+                    name='MACD Histogram',
+                    marker_color='green'
+                ), row=2, col=1)
+            
+            fig_macd.update_layout(title="MACD Indicator", height=500)
+            st.plotly_chart(fig_macd, use_container_width=True)
+        
+        with col2:
+            # Stochastic Oscillator
+            fig_stoch = go.Figure()
+            if 'stoch_k' in data.columns:
+                fig_stoch.add_trace(go.Scatter(
+                    x=data['date'], y=data['stoch_k'],
+                    mode='lines', name='%K',
+                    line=dict(color='blue')
+                ))
+                fig_stoch.add_trace(go.Scatter(
+                    x=data['date'], y=data['stoch_d'],
+                    mode='lines', name='%D',
+                    line=dict(color='red')
+                ))
+                fig_stoch.add_hline(y=80, line_dash="dash", line_color="red", annotation_text="Overbought (80)")
+                fig_stoch.add_hline(y=20, line_dash="dash", line_color="green", annotation_text="Oversold (20)")
+            
+            fig_stoch.update_layout(
+                title="Stochastic Oscillator",
+                xaxis_title="Date",
+                yaxis_title="Stochastic",
+                yaxis_range=[0, 100],
+                height=500
+            )
+            st.plotly_chart(fig_stoch, use_container_width=True)
+        
+        # RSI chart
+        fig_rsi = go.Figure()
+        fig_rsi.add_trace(go.Scatter(
+            x=data['date'], y=data['rsi'],
+            mode='lines', name='RSI',
+            line=dict(color='blue')
+        ))
+        fig_rsi.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought (70)")
+        fig_rsi.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold (30)")
+        fig_rsi.add_hline(y=50, line_dash="dot", line_color="gray", annotation_text="Neutral (50)")
+        fig_rsi.update_layout(
+            title="RSI (Relative Strength Index)",
+            xaxis_title="Date",
+            yaxis_title="RSI",
+            yaxis_range=[0, 100],
+            height=400
+        )
+        st.plotly_chart(fig_rsi, use_container_width=True)
+        
+        # Momentum indicators
+        col1, col2 = st.columns(2)
+        with col1:
             fig_momentum = go.Figure()
             fig_momentum.add_trace(go.Scatter(
                 x=data['date'], y=data['momentum_5'],
@@ -418,25 +565,6 @@ with tab3:
                 height=400
             )
             st.plotly_chart(fig_vol, use_container_width=True)
-        
-        # RSI chart
-        fig_rsi = go.Figure()
-        fig_rsi.add_trace(go.Scatter(
-            x=data['date'], y=data['rsi'],
-            mode='lines', name='RSI',
-            line=dict(color='blue')
-        ))
-        fig_rsi.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought (70)")
-        fig_rsi.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold (30)")
-        fig_rsi.add_hline(y=50, line_dash="dot", line_color="gray", annotation_text="Neutral (50)")
-        fig_rsi.update_layout(
-            title="RSI (Relative Strength Index)",
-            xaxis_title="Date",
-            yaxis_title="RSI",
-            yaxis_range=[0, 100],
-            height=400
-        )
-        st.plotly_chart(fig_rsi, use_container_width=True)
     else:
         st.info("Please run analysis to see technical indicators")
 
@@ -506,7 +634,9 @@ with tab5:
         
         # Data table
         st.subheader("Data Table")
-        display_data = data[['date', 'price', 'volume', 'return', 'SMA_10', 'SMA_50', 'rsi', 'volatility_10']].copy()
+        display_columns = ['date', 'price', 'volume', 'return', 'SMA_10', 'SMA_50', 'rsi', 'volatility_10']
+        available_columns = [col for col in display_columns if col in data.columns]
+        display_data = data[available_columns].copy()
         st.dataframe(display_data, use_container_width=True, height=400)
         
         col1, col2 = st.columns(2)
@@ -514,15 +644,19 @@ with tab5:
         with col1:
             # Summary statistics
             st.subheader("Summary Statistics")
+            current_rsi = data['rsi'].iloc[-1] if 'rsi' in data.columns and not pd.isna(data['rsi'].iloc[-1]) else 0
+            current_vol = data['volatility_10'].iloc[-1] if 'volatility_10' in data.columns and not pd.isna(data['volatility_10'].iloc[-1]) else 0
+            current_spike = data['volume_spike'].iloc[-1] if 'volume_spike' in data.columns and not pd.isna(data['volume_spike'].iloc[-1]) else 0
+            
             st.markdown(f"""
             **Total Observations:** {len(data)}  
             **Date Range:** {data['date'].min()} to {data['date'].max()}  
             **Data Points:** {len(data)} days  
             
             **Current Indicators:**  
-            **RSI:** {data['rsi'].iloc[-1]:.2f}  
-            **10-day Volatility:** {data['volatility_10'].iloc[-1]:.4f}  
-            **Volume Spike:** {data['volume_spike'].iloc[-1]:.2f}
+            **RSI:** {current_rsi:.2f}  
+            **10-day Volatility:** {current_vol:.4f}  
+            **Volume Spike:** {current_spike:.2f}
             """)
         
         with col2:
