@@ -415,7 +415,9 @@ with tab2:
                 xaxis_title="Date",
                 yaxis_title="Return",
                 yaxis_tickformat=".2%",
-                height=400
+                height=400,
+                plot_bgcolor='#d2cbbc',
+                paper_bgcolor='#d2cbbc'
             )
             st.plotly_chart(fig_returns, use_container_width=True)
         
@@ -476,7 +478,10 @@ with tab3:
                     marker_color='green'
                 ), row=2, col=1)
             
-            fig_macd.update_layout(title="MACD Indicator", height=500)
+            fig_macd.update_layout(title="MACD Indicator", height=500,
+                plot_bgcolor='#d2cbbc',
+                paper_bgcolor='#d2cbbc'
+)
             st.plotly_chart(fig_macd, use_container_width=True)
         
         with col2:
@@ -501,7 +506,10 @@ with tab3:
                 xaxis_title="Date",
                 yaxis_title="Stochastic",
                 yaxis_range=[0, 100],
-                height=500
+                height=500,
+                plot_bgcolor='#d2cbbc',
+                paper_bgcolor='#d2cbbc'
+
             )
             st.plotly_chart(fig_stoch, use_container_width=True)
         
@@ -520,7 +528,10 @@ with tab3:
             xaxis_title="Date",
             yaxis_title="RSI",
             yaxis_range=[0, 100],
-            height=400
+            height=400,
+            plot_bgcolor='#d2cbbc',
+            paper_bgcolor='#d2cbbc'
+
         )
         st.plotly_chart(fig_rsi, use_container_width=True)
         
@@ -564,7 +575,10 @@ with tab3:
                 title="Rolling Volatility",
                 xaxis_title="Date",
                 yaxis_title="Volatility",
-                height=400
+                height=400,
+                plot_bgcolor='#d2cbbc',
+                paper_bgcolor='#d2cbbc'
+
             )
             st.plotly_chart(fig_vol, use_container_width=True)
     else:
@@ -587,7 +601,10 @@ with tab4:
             title="Trading Volume",
             xaxis_title="Date",
             yaxis_title="Volume (USD)",
-            height=500
+            height=500,
+            plot_bgcolor='#d2cbbc',
+            paper_bgcolor='#d2cbbc'
+
         )
         st.plotly_chart(fig_volume, use_container_width=True)
         
@@ -607,7 +624,10 @@ with tab4:
                 title="Volume Spike Indicator",
                 xaxis_title="Date",
                 yaxis_title="Volume / SMA(10)",
-                height=400
+                height=400,
+                plot_bgcolor='#d2cbbc',
+                paper_bgcolor='#d2cbbc'
+
             )
             st.plotly_chart(fig_spike, use_container_width=True)
         
