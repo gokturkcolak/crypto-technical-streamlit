@@ -394,8 +394,20 @@ with tab2:
             yaxis_title="Price (USD)",
             hovermode='x unified',
             height=600,
-            plot_bgcolor='#d2cbbc',
-            paper_bgcolor='#d2cbbc'
+            plot_bgcolor='#e5edf2',
+            paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000'),
+                tickformat="$,.8f",
+            )
         )
         
         st.plotly_chart(fig, use_container_width=True)
@@ -416,8 +428,19 @@ with tab2:
                 yaxis_title="Return",
                 yaxis_tickformat=".2%",
                 height=400,
-                plot_bgcolor='#d2cbbc',
-                paper_bgcolor='#d2cbbc'
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
             )
             st.plotly_chart(fig_returns, use_container_width=True)
         
@@ -479,8 +502,19 @@ with tab3:
                 ), row=2, col=1)
             
             fig_macd.update_layout(title="MACD Indicator", height=500,
-                plot_bgcolor='#d2cbbc',
-                paper_bgcolor='#d2cbbc'
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 )
             st.plotly_chart(fig_macd, use_container_width=True)
         
@@ -507,8 +541,19 @@ with tab3:
                 yaxis_title="Stochastic",
                 yaxis_range=[0, 100],
                 height=500,
-                plot_bgcolor='#d2cbbc',
-                paper_bgcolor='#d2cbbc'
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 
             )
             st.plotly_chart(fig_stoch, use_container_width=True)
@@ -529,8 +574,19 @@ with tab3:
             yaxis_title="RSI",
             yaxis_range=[0, 100],
             height=400,
-            plot_bgcolor='#d2cbbc',
-            paper_bgcolor='#d2cbbc'
+            plot_bgcolor='#e5edf2',
+            paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 
         )
         st.plotly_chart(fig_rsi, use_container_width=True)
@@ -554,7 +610,20 @@ with tab3:
                 title="Momentum Indicators",
                 xaxis_title="Date",
                 yaxis_title="Momentum",
-                height=400
+                height=400,
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
             )
             st.plotly_chart(fig_momentum, use_container_width=True)
         
@@ -576,8 +645,19 @@ with tab3:
                 xaxis_title="Date",
                 yaxis_title="Volatility",
                 height=400,
-                plot_bgcolor='#d2cbbc',
-                paper_bgcolor='#d2cbbc'
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 
             )
             st.plotly_chart(fig_vol, use_container_width=True)
@@ -602,8 +682,19 @@ with tab4:
             xaxis_title="Date",
             yaxis_title="Volume (USD)",
             height=500,
-            plot_bgcolor='#d2cbbc',
-            paper_bgcolor='#d2cbbc'
+            plot_bgcolor='#e5edf2',
+            paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 
         )
         st.plotly_chart(fig_volume, use_container_width=True)
@@ -625,8 +716,19 @@ with tab4:
                 xaxis_title="Date",
                 yaxis_title="Volume / SMA(10)",
                 height=400,
-                plot_bgcolor='#d2cbbc',
-                paper_bgcolor='#d2cbbc'
+                plot_bgcolor='#e5edf2',
+                paper_bgcolor='#e5edf2',
+            font_color='#000000',
+            title_font=dict(color='#000000'),
+            legend_font_color='#000000',
+            xaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            ),
+            yaxis=dict(
+                color='#000000',
+                tickfont=dict(color='#000000')
+            )
 
             )
             st.plotly_chart(fig_spike, use_container_width=True)
