@@ -1,7 +1,7 @@
 # Crypto Technical Analysis App
 
 ## Overview
-This is a Streamlit-based web application for performing technical analysis on cryptocurrency data. The app provides users with real-time price charts, technical indicators, and insights to assist in analyzing crypto markets.
+This is a Streamlit-based web application for performing technical analysis on on-chain cryptocurrency data. The app provides users with real-time price charts, technical indicators, and insights to assist in analyzing crypto markets.
 
 **Live Demo**: [Crypto Technical Analysis](https://crypto-technical.streamlit.app)
 
